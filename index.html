@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sua Loja Online - Moda Feminina</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    
+    <!-- SDK do EmailJS para notificações por e-mail -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Inter', 'sans-serif'],
+                        'serif': ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        html { scroll-behavior: smooth; }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .cart-items::-webkit-scrollbar, .admin-table-body::-webkit-scrollbar { width: 8px; }
+        .cart-items::-webkit-scrollbar-track, .admin-table-body::-webkit-scrollbar-track { background: #f1f1f1; }
+        .cart-items::-webkit-scrollbar-thumb, .admin-table-body::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+        .cart-items::-webkit-scrollbar-thumb:hover, .admin-table-body::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+
+    <!-- Conteúdo principal da loja (será ocultado para o painel admin) -->
+    <div id="store-content">
+        <!-- Cabeçalho -->
+        <header class="bg-white shadow-sm sticky top-0 z-40">
+            <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+                <h1 class="text-3xl font-serif text-gray-800">Sua Loja</h1>
+                <div class="flex items-center space-x-4">
+                    <a href="#" class="text-gray-600 hover:text-gray-800">Início</a>
+                    <a href="#produtos" class="text-gray-600 hover:text-gray-800">Produtos</a>
+                    <a href="#" class="text-gray-600 hover:text-gray-800">Contato</a>
+                    <button id="cart-button" class="relative">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600 hover:text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                        <span id="cart-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
+                    </button>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Seção Principal (Hero) -->
+        <main class="container mx-auto px-6 py-16 text-center">
+            <div class="bg-pink-100 rounded-lg p-12">
+                <h2 class="text-4xl md:text-5xl font-serif text-gray-800 mb-4">Estilo que Inspira</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto mb-8">Descubra as últimas tendências da moda feminina. Peças selecionadas para realçar sua beleza e confiança em qualquer ocasião.</p>
+                <a href="#produtos" class="bg-gray-800 text-white font-semibold py-3 px-8 rounded-lg hover:bg-gray-700 transition duration-300">Ver Coleção</a>
+            </div>
+        </main>
+
+        <!-- Seção de Produtos -->
+        <section id="produtos" class="py-16">
+            <div class="container mx-auto px-6">
+                <h3 class="text-3xl font-serif text-center text-gray-800 mb-10">Nossos Produtos</h3>
+                <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                    <!-- Os produtos serão inseridos aqui pelo JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Rodapé -->
+        <footer class="bg-white mt-16 border-t">
+            <div class="container mx-auto px-6 py-8 text-center text-gray-600">
+                <p>&copy; 2025 Sua Loja. Todos os direitos reservados.</p>
+                <p class="text-sm mt-2">Desenvolvido com a tecnologia de Web App.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Painel de Pedidos (Admin) -->
+    <div id="admin-panel" class="hidden">
+        <div class="container mx-auto px-6 py-12 min-h-screen">
+            <div class="flex justify-between items-center mb-8">
+                 <h2 class="text-3xl font-serif text-gray-800">Painel de Pedidos</h2>
+                 <a href="#" class="text-sm font-semibold text-blue-600 hover:underline">&larr; Voltar para a Loja</a>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left text-gray-500">
+                        <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                            <tr>
+                                <th scope="col" class="py-3 px-6">Data</th>
+                                <th scope="col" class="py-3 px-6">Cliente</th>
+                                <th scope="col" class="py-3 px-6">Produtos</th>
+                                <th scope="col" class="py-3 px-6">Total</th>
+                                <th scope="col" class="py-3 px-6">Endereço</th>
+                                <th scope="col" class="py-3 px-6">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-table-body" class="admin-table-body">
+                            <!-- Pedidos do Firebase serão inseridos aqui -->
+                            <tr><td colspan="6" class="text-center py-10">Carregando pedidos...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Página de Checkout (inicialmente oculta) -->
+    <div id="checkout-page" class="hidden">
+        <div class="container mx-auto px-6 py-12">
+            <h2 class="text-3xl font-serif text-center text-gray-800 mb-10">Finalizar Compra</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <!-- Coluna de Formulários -->
+                <div>
+                    <!-- Formulário de Entrega -->
+                    <h3 class="text-xl font-semibold mb-4">1. Endereço de Entrega</h3>
+                    <form id="checkout-form" class="space-y-4 bg-white p-6 rounded-lg shadow-md">
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-gray-700">Nome Completo</label>
+                            <input type="text" id="name" name="name" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required>
+                        </div>
+                        <div>
+                            <label for="address" class="block text-sm font-medium text-gray-700">Endereço</label>
+                            <input type="text" id="address" name="address" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required>
+                        </div>
+                        <div>
+                            <label for="city" class="block text-sm font-medium text-gray-700">Cidade</label>
+                            <input type="text" id="city" name="city" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required>
+                        </div>
+                        <div>
+                            <label for="zip" class="block text-sm font-medium text-gray-700">CEP</label>
+                            <input type="text" id="zip" name="zip" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required>
+                        </div>
+                    </form>
+
+                    <!-- Seção de Pagamento -->
+                    <h3 class="text-xl font-semibold mb-4 mt-8">2. Forma de Pagamento</h3>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <div id="payment-methods" class="flex border border-gray-200 rounded-md overflow-hidden">
+                            <button data-payment="credit-card" class="payment-method-btn flex-1 p-3 text-sm font-semibold bg-white border-r">Cartão de Crédito</button>
+                            <button data-payment="pix" class="payment-method-btn flex-1 p-3 text-sm font-semibold bg-gray-100 text-gray-500">PIX</button>
+                            <button data-payment="boleto" class="payment-method-btn flex-1 p-3 text-sm font-semibold bg-gray-100 text-gray-500 border-l">Boleto</button>
+                        </div>
+
+                        <div id="payment-content" class="mt-4">
+                            <div id="credit-card-info"><!-- Formulário do cartão --></div>
+                            <div id="pix-info" class="hidden text-center p-4">
+                                <p class="font-semibold">Pagamento via PIX</p>
+                                <p class="text-sm text-gray-600 mt-2">Um QR Code será gerado após a confirmação do pedido.</p>
+                            </div>
+                            <div id="boleto-info" class="hidden text-center p-4">
+                                <p class="font-semibold">Pagamento com Boleto Bancário</p>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" form="checkout-form" class="w-full bg-gray-800 text-white font-semibold py-3 rounded-lg hover:bg-gray-700 transition duration-300 mt-6">Confirmar e Pagar</button>
+                </div>
+
+                <!-- Resumo do Pedido -->
+                <div class="bg-white p-6 rounded-lg shadow-md h-fit">
+                    <h3 class="text-xl font-semibold mb-4 border-b pb-4">Resumo do Pedido</h3>
+                    <div id="checkout-summary" class="space-y-4"></div>
+                    <div class="border-t mt-4 pt-4 space-y-2">
+                        <div class="flex justify-between items-center text-gray-600">
+                            <span>Subtotal:</span>
+                            <span id="subtotal-amount">R$ 0,00</span>
+                        </div>
+                        <div class="flex justify-between items-center mt-4 pt-4 border-t">
+                            <span class="text-lg font-semibold text-gray-800">Total:</span>
+                            <span id="checkout-total" class="text-xl font-bold text-gray-800">R$ 0,00</span>
+                        </div>
+                    </div>
+                     <button id="back-to-store-btn" class="w-full mt-6 text-center text-gray-600 hover:text-gray-800 font-semibold py-2">&larr; Voltar à loja</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modals e Overlays (Confirmação, Carrinho, etc) -->
+    <div id="confirmation-page" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
+        <div class="bg-white p-12 rounded-lg shadow-xl max-w-2xl mx-auto text-center">
+            <div id="confirmation-content"></div>
+            <button id="back-to-home-btn" class="bg-gray-800 text-white font-semibold py-3 px-8 rounded-lg hover:bg-gray-700 transition duration-300 mt-8">Voltar para a Loja</button>
+        </div>
+    </div>
+    <div id="cart-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden"></div>
+    <div id="cart-modal" class="fixed top-0 right-0 h-full w-full max-w-sm bg-white shadow-xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
+        <div class="flex justify-between items-center p-4 border-b"><h2 class="text-xl font-semibold">Seu Carrinho</h2><button id="close-cart-button">&times;</button></div>
+        <div id="cart-items" class="flex-grow p-4 overflow-y-auto cart-items"></div>
+        <div class="p-4 border-t"><div class="flex justify-between items-center mb-4"><span class="text-lg font-semibold">Total:</span><span id="cart-total" class="text-xl font-bold">R$ 0,00</span></div><button id="checkout-btn" class="w-full bg-gray-800 text-white font-semibold py-3 px-4 rounded-lg hover:bg-gray-700">Finalizar Compra</button></div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <!-- Módulo do Firebase -->
+    <script type="module">
+        // Importar funções necessárias do SDK do Firebase que você precisa
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        
+        // --- CONFIGURAÇÃO E INICIALIZAÇÃO (IMPORTANTE!) ---
+        // 1. CRIE UM PROJETO NO FIREBASE (console.firebase.google.com)
+        // 2. VA EM "CONFIGURAÇÕES DO PROJETO" E COPIE O OBJETO de CONFIGURAÇÃO
+        // 3. COLE O OBJETO DE CONFIGURAÇÃO AQUI
+        const firebaseConfig = {
+            apiKey: "COLE_SUA_API_KEY_AQUI",
+            authDomain: "SEU_PROJETO.firebaseapp.com",
+            projectId: "SEU_PROJECT_ID",
+            storageBucket: "SEU_PROJETO.appspot.com",
+            messagingSenderId: "SEU_SENDER_ID",
+            appId: "SEU_APP_ID"
+        };
+        
+        // Inicializa o Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // --- CONFIGURAÇÃO DO EMAILJS (IMPORTANTE!) ---
+        // 1. CRIE UMA CONTA EM emailjs.com
+        // 2. PEGUE SEU "PUBLIC KEY", "SERVICE ID" E "TEMPLATE ID" E COLE AQUI
+        const emailJS_config = {
+            publicKey: 'SUA_PUBLIC_KEY',
+            serviceID: 'SEU_SERVICE_ID',
+            templateID: 'SEU_TEMPLATE_ID',
+            ownerEmail: 'britodeandrade@gmail.com'
+        };
+        emailjs.init({ publicKey: emailJS_config.publicKey });
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DADOS DOS PRODUTOS (EXEMPLO) ---
+            const products = [
+                { id: 1, name: 'Vestido Elegante', price: 299.90, image: 'https://placehold.co/400x500/f3e8f3/333333?text=Vestido+Elegante', description: 'Perfeito para ocasiões especiais.' },
+                { id: 2, name: 'Blusa Moderna', price: 149.90, image: 'https://placehold.co/400x500/e9d5e9/333333?text=Blusa+Moderna', description: 'Conforto e estilo para o dia a dia.' },
+                { id: 3, name: 'Saia Midi', price: 189.90, image: 'https://placehold.co/400x500/dcd2e2/333333?text=Saia+Midi', description: 'Versatilidade e charme.' },
+                { id: 4, name: 'Calça Jeans', price: 229.90, image: 'https://placehold.co/400x500/f1e7f0/333333?text=Cal%C3%A7a+Jeans', description: 'Um clássico indispensável.' },
+            ];
+
+            let cart = [];
+            let activePaymentMethod = 'credit-card';
+            
+            // --- REFERÊNCIAS AO DOM ---
+            const storeContent = document.getElementById('store-content');
+            const adminPanel = document.getElementById('admin-panel');
+            const checkoutPage = document.getElementById('checkout-page');
+            const confirmationPage = document.getElementById('confirmation-page');
+            const productGrid = document.getElementById('product-grid');
+            const checkoutForm = document.getElementById('checkout-form');
+            const cartButton = document.getElementById('cart-button');
+            const closeCartButton = document.getElementById('close-cart-button');
+            const cartModal = document.getElementById('cart-modal');
+            const cartOverlay = document.getElementById('cart-overlay');
+            const cartCount = document.getElementById('cart-count');
+            const cartItemsContainer = document.getElementById('cart-items');
+            const cartTotal = document.getElementById('cart-total');
+            const checkoutBtn = document.getElementById('checkout-btn');
+
+            const formatCurrency = (value) => `R$ ${value.toFixed(2).replace('.', ',')}`;
+
+            // --- LÓGICA PRINCIPAL ---
+            function renderProducts() { /* ...código existente sem alterações... */ }
+            function toggleCart() { /* ...código existente sem alterações... */ }
+            function addToCart(productId) { /* ...código existente sem alterações... */ }
+            function removeFromCart(productId) { /* ...código existente sem alterações... */ }
+            function updateCartUI() { /* ...código existente sem alterações... */ }
+
+            async function handleCheckout(e) {
+                e.preventDefault();
+                const formData = new FormData(checkoutForm);
+                const customerData = {
+                    name: formData.get('name'),
+                    address: formData.get('address'),
+                    city: formData.get('city'),
+                    zip: formData.get('zip'),
+                };
+                const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+                const order = {
+                    customer: customerData,
+                    items: cart,
+                    total: total,
+                    paymentMethod: activePaymentMethod,
+                    status: 'Aguardando Pagamento',
+                    createdAt: new Date()
+                };
+
+                try {
+                    // 1. Salvar pedido no Firebase
+                    const docRef = await addDoc(collection(db, "orders"), order);
+                    console.log("Pedido salvo com ID: ", docRef.id);
+
+                    // 2. Enviar notificação por e-mail
+                    sendNewOrderEmail(order);
+                    
+                    // 3. Mostrar confirmação para o cliente
+                    showConfirmation(customerData.name, activePaymentMethod);
+
+                    // 4. Limpar carrinho
+                    cart = [];
+                    updateCartUI();
+                    checkoutForm.reset();
+
+                } catch (error) {
+                    console.error("Erro ao salvar o pedido: ", error);
+                    alert("Ocorreu um erro ao processar seu pedido. Tente novamente.");
+                }
+            }
+
+            function sendNewOrderEmail(order) {
+                const templateParams = {
+                    to_email: emailJS_config.ownerEmail,
+                    customer_name: order.customer.name,
+                    order_details: order.items.map(item => `${item.quantity}x ${item.name}`).join(', '),
+                    total_price: formatCurrency(order.total),
+                    delivery_address: `${order.customer.address}, ${order.customer.city} - ${order.customer.zip}`
+                };
+
+                emailjs.send(emailJS_config.serviceID, emailJS_config.templateID, templateParams)
+                    .then((response) => {
+                       console.log('E-mail de notificação enviado!', response.status, response.text);
+                    }, (error) => {
+                       console.error('Falha ao enviar e-mail de notificação.', error);
+                    });
+            }
+
+            function showConfirmation(name, paymentMethod) { /* ...código da função showConfirmation existente... */ }
+            function updateCheckoutTotal() { /* ...código existente sem alterações... */ }
+            function renderCheckoutSummary() { /* ...código existente sem alterações... */ }
+            
+            function showAdminPanel() {
+                storeContent.classList.add('hidden');
+                adminPanel.classList.remove('hidden');
+                listenToOrders();
+            }
+
+            function showStore() {
+                storeContent.classList.remove('hidden');
+                adminPanel.classList.add('hidden');
+                window.location.hash = '';
+            }
+
+            function listenToOrders() {
+                const ordersCollection = collection(db, 'orders');
+                onSnapshot(ordersCollection, (snapshot) => {
+                    const ordersTableBody = document.getElementById('orders-table-body');
+                    if (snapshot.empty) {
+                        ordersTableBody.innerHTML = '<tr><td colspan="6" class="text-center py-10">Nenhum pedido encontrado.</td></tr>';
+                        return;
+                    }
+                    ordersTableBody.innerHTML = '';
+                    snapshot.docs.forEach(doc => {
+                        const order = doc.data();
+                        const orderDate = order.createdAt.toDate();
+                        const formattedDate = `${orderDate.toLocaleDateString('pt-BR')} ${orderDate.toLocaleTimeString('pt-BR')}`;
+                        
+                        const row = `
+                            <tr class="bg-white border-b hover:bg-gray-50">
+                                <td class="py-4 px-6">${formattedDate}</td>
+                                <td class="py-4 px-6 font-medium text-gray-900">${order.customer.name}</td>
+                                <td class="py-4 px-6">${order.items.map(i => `${i.quantity}x ${i.name}`).join('<br>')}</td>
+                                <td class="py-4 px-6 font-bold">${formatCurrency(order.total)}</td>
+                                <td class="py-4 px-6">${order.customer.address}, ${order.customer.city}</td>
+                                <td class="py-4 px-6"><span class="bg-yellow-100 text-yellow-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">${order.status}</span></td>
+                            </tr>
+                        `;
+                        ordersTableBody.insertAdjacentHTML('afterbegin', row); // Adiciona no topo
+                    });
+                });
+            }
+
+            // --- ROTEAMENTO SIMPLES E EVENTOS ---
+            if (window.location.hash === '#admin') showAdminPanel();
+            else showStore();
+
+            document.querySelector('#admin-panel a').addEventListener('click', showStore);
+            checkoutForm.addEventListener('submit', handleCheckout);
+            cartButton.addEventListener('click', toggleCart);
+            closeCartButton.addEventListener('click', toggleCart);
+            cartOverlay.addEventListener('click', toggleCart);
+            checkoutBtn.addEventListener('click', () => { 
+                if (cart.length > 0) { 
+                    storeContent.classList.add('hidden'); 
+                    checkoutPage.classList.remove('hidden'); 
+                    toggleCart(); 
+                    renderCheckoutSummary(); 
+                } 
+            });
+            // ...outros event listeners existentes...
+            
+            // --- INICIALIZAÇÃO ---
+            renderProducts();
+            updateCartUI();
+        });
+    </script>
+</body>
+</html>
+
