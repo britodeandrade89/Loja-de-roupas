@@ -340,7 +340,22 @@
                 adminPanel.classList.remove('hidden');
                 listenToOrders();
             }
+// ... dentro do arquivo index.html
 
+// --- CONFIGURAÇÃO DO FIREBASE (PASSO 1) ---
+const firebaseConfig = {
+    // COLE AQUI O BLOCO DE CÓDIGO INTEIRO DO FIREBASE
+};
+
+// --- CONFIGURAÇÃO DO EMAILJS (PASSO 2) ---
+const emailJS_config = {
+    publicKey: 'COLE_AQUI_SUA_PUBLIC_KEY',   // O código do Passo 3 do EmailJS
+    serviceID: 'COLE_AQUI_SEU_SERVICE_ID',   // O código do Passo 1 do EmailJS
+    templateID: 'COLE_AQUI_SEU_TEMPLATE_ID', // O código do Passo 2 do EmailJS
+    ownerEmail: 'britodeandrade@gmail.com'
+};
+
+// ... resto do código
             function showStore() {
                 storeContent.classList.remove('hidden');
                 adminPanel.classList.add('hidden');
@@ -402,4 +417,5 @@
     </script>
 </body>
 </html>
+
 
